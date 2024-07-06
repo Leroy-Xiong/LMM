@@ -117,7 +117,7 @@ def enet_coordinate_descent(
             if dual_norm_XtA > alpha:
                 const = alpha / dual_norm_XtA
                 A_norm2 = R_norm2 * (const ** 2)
-                gap = 0.5 * (R_norm2 + A_norm2)
+                gap = 0.5 * (R_norm2 + A_norm2) / n_samples
             else:
                 const = 1.0
                 gap = R_norm2
