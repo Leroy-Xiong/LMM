@@ -1,4 +1,4 @@
-Consider a dataset $\{\boldsymbol{y}, \boldsymbol{Z}, \boldsymbol{X}\}$ with $n$ samples, where $\boldsymbol{y} \in \mathbb{R}^n$ is the vector of response variable, $\boldsymbol{Z} \in \mathbb{R}^{n\times c}$ is the matrix of $c$ independent variables, and $\boldsymbol{X} \in \mathbb{R}^{n\times p}$ is another matrix of $p$ variables. The linear mixed model (LMM) builds upon a linear relationship from $\boldsymbol{y}$ to $\{\boldsymbol{Z}, \boldsymbol{X}\}$ by
+<!-- Consider a dataset $\{\boldsymbol{y}, \boldsymbol{Z}, \boldsymbol{X}\}$ with $n$ samples, where $\boldsymbol{y} \in \mathbb{R}^n$ is the vector of response variable, $\boldsymbol{Z} \in \mathbb{R}^{n\times c}$ is the matrix of $c$ independent variables, and $\boldsymbol{X} \in \mathbb{R}^{n\times p}$ is another matrix of $p$ variables. The linear mixed model (LMM) builds upon a linear relationship from $\boldsymbol{y}$ to $\{\boldsymbol{Z}, \boldsymbol{X}\}$ by
 $$\boldsymbol{y} = \boldsymbol{Z}\boldsymbol{\omega} + \boldsymbol{X}\boldsymbol{\beta} + \boldsymbol{e},$$
 
 
@@ -41,4 +41,4 @@ We want to find the parameters $\boldsymbol{\Theta}$ that maximize the expectati
 
 $$
 \boldsymbol{\Theta}^{(t+1)} = \text{argmax}_{\boldsymbol{\Theta}} Q(\boldsymbol{\Theta} \mid \boldsymbol{\Theta}^{(t)})
-$$
+$$ -->
