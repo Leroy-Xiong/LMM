@@ -1,6 +1,6 @@
 import numpy as np
 from sklearn.metrics import mean_squared_error
-from code.em_algorithm import em_algorithm, plot_marginal_likelihood
+from code.em_algorithm import EMAlgorithm
 from code.lasso import ElasticNet, lambda_search
 from code.load_data import generate_data, load_data
 
@@ -10,12 +10,14 @@ if __name__ == '__main__':
     # y, Z, X = load_data(path='lmm_y_z_x.txt')
 
     # ---------------- EM algorithm ----------------
-    log_marginal_likelihoods, Theta, E_beta = em_algorithm(y, Z, X, tol=1e-6, max_iter=1000)
+    em = EMAlgorithm(tol=1e-6, max_iter=1000)
+    log_marginal_likelihoods, Theta, E_beta = em.fit(y, Z, X)
+
     print("Log marginal likelihoods:", log_marginal_likelihoods)
     print("Estimate of Theta:", Theta)
     print("Posterior mean of beta:", E_beta)
 
-    plot_marginal_likelihood(log_marginal_likelihoods, 'outputs/log_marginal_likelihoods.png')
+    em.plot_marginal_likelihood('outputs/log_marginal_likelihoods.png')
 
     # ---------------- LASSO -----------------
     lasso_params = {'alpha': 0.0005, 'fit_intercept': False, 'l1_ratio': 1.0, 'max_iter': 1000}
@@ -35,6 +37,6 @@ if __name__ == '__main__':
 
 
     # ------------------- Search for the best lambda -------------------
-    min_mse, min_average_row = lambda_search(y, Z, X, ElasticNet, lasso_params, lambda_list = np.arange(0.003, 0.01 + 0.0001, 0.0001), save_path='outputs/cv_mses_all.npy', cv_folds=10)
+    min_mse, min_average_row = lambda_search(y, Z, X, ElasticNet, lasso_params, lambda_list = np.arange(0.003, 0.04 + 0.0001, 0.0001), save_path='outputs/cv_mses_all.npy', cv_folds=10)
     print("Minimum MSE:", min_mse)
     print("Minimum average row:", min_average_row)

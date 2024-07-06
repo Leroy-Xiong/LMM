@@ -42,3 +42,6 @@ We want to find the parameters $\boldsymbol{\Theta}$ that maximize the expectati
 $$
 \boldsymbol{\Theta}^{(t+1)} = \text{argmax}_{\boldsymbol{\Theta}} Q(\boldsymbol{\Theta} \mid \boldsymbol{\Theta}^{(t)})
 $$ -->
+
+
+# Linear Mixed Model
