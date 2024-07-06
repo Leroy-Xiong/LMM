@@ -7,6 +7,7 @@ def cross_validate(y, Z, X, model_class, model_params, n_splits=5):
     # seperate data into train and test
     kf = KFold(n_splits=n_splits, shuffle=True, random_state=0)
     mses = np.zeros(n_splits)
+    
     for i, (train_index, test_index) in enumerate(kf.split(y)):
         y_train, y_test = y[train_index], y[test_index]
         Z_train, Z_test = Z[train_index], Z[test_index]

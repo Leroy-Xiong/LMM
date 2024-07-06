@@ -103,7 +103,7 @@ class EMAlgorithm:
     def predict(self, Z, X):
         omega = self.Theta[:self.c]
         E_beta = self.E_beta
-        
+
         y_hat = Z @ omega + X @ E_beta
 
         return y_hat
