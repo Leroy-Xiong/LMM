@@ -20,3 +20,20 @@ def generate_data(n=10000, c=10, p= 5000, omega=np.random.randn(10), sigma_b2 = 
     y = Z @ omega + X @ beta + e
 
     return y, Z, X
+
+def split_train_test(y, Z, X, test_size=0.2):
+    n = y.shape[0]
+    indices = np.arange(n)
+    np.random.shuffle(indices)
+    train_indices = indices[: int(n * (1 - test_size))]
+    test_indices = indices[int(n * (1 - test_size)) :]
+
+    y_train = y[train_indices]
+    Z_train = Z[train_indices, :]
+    X_train = X[train_indices, :]
+    y_test = y[test_indices]
+    Z_test = Z[test_indices, :]
+    X_test = X[test_indices, :]
+
+    return y_train, Z_train, X_train, y_test, Z_test, X_test
+

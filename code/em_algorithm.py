@@ -92,11 +92,21 @@ class EMAlgorithm:
             print(log_marginal_likelihood)
             log_marginal_likelihoods.append(log_marginal_likelihood)
 
+        self.n = n
+        self.p = p
+        self.c = c
         self.log_marginal_likelihoods = log_marginal_likelihoods
         self.Theta = Theta
         self.E_beta = E_beta
         return log_marginal_likelihoods, Theta, E_beta
 
+    def predict(self, Z, X):
+        omega = self.Theta[:self.c]
+        E_beta = self.E_beta
+        
+        y_hat = Z @ omega + X @ E_beta
+
+        return y_hat
 
     def plot_marginal_likelihood(self, save_path):
         plt.figure(figsize=(5, 3), dpi=300)
