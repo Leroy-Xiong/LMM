@@ -1,8 +1,18 @@
 import numpy as np
+import pandas as pd
 
+
+def check_numpy_array(array):
+    array_pd = pd.DataFrame(array)
+    print(array_pd)
+    print(array_pd.describe())
 
 def load_data(path='lmm_y_z_x.txt'):
     data = np.loadtxt(path, delimiter='\t', skiprows=1)
+
+    # check_numpy_array(data)
+    # data = (data - np.mean(data, axis=0)) / np.std(data, axis=0)
+
     y = data[:, 0]
     Z = data[:, 1:11]
     X = data[:, 11:]
@@ -16,6 +26,8 @@ def generate_data(n=10000, c=10, p= 5000, omega=np.random.randn(10), sigma_b2 = 
 
     beta = np.random.normal(0, np.sqrt(sigma_b2), p)
     e = np.random.normal(0, np.sqrt(sigma_e2), n)
+
+    # print(beta)
 
     y = Z @ omega + X @ beta + e
 

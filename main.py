@@ -1,4 +1,5 @@
 import numpy as np
+from sklearn.linear_model import Ridge, ridge_regression
 from sklearn.metrics import mean_squared_error
 from code.cross_validation import cross_validate
 from code.em_algorithm import EMAlgorithm
@@ -25,15 +26,18 @@ def em_algorithm(y, Z, X, omega_init, sigma_b2_init, sigma_e2_init, max_iter=200
     y_test_pred = em.predict(Z_test, X_test)
     print('EM Test MSE:', mean_squared_error(y_test, y_test_pred))
 
-    # Cross validation
-    cv_mses = cross_validate(y, Z, X, EMAlgorithm, em_params, n_splits=cv_folds)
-
-    print('CV Mean MSE:', np.mean(cv_mses))
-    print('CV MSEs:', cv_mses)
-
-    np.save('outputs/em_cv_mses.npy', cv_mses)
-
+    # Plot marginal likelihood
     em.plot_marginal_likelihood('outputs/log_marginal_likelihoods.png')
+
+    # Cross validation
+    # cv_mses = cross_validate(y, Z, X, EMAlgorithm, em_params, n_splits=cv_folds)
+
+    # print('CV Mean MSE:', np.mean(cv_mses))
+    # print('CV MSEs:', cv_mses)
+
+    # np.save('outputs/em_cv_mses.npy', cv_mses)
+
+    
 
 def lasso(y, Z, X, cv_folds=10):
 
@@ -60,7 +64,7 @@ def lasso(y, Z, X, cv_folds=10):
 
 
 if __name__ == '__main__':
-    # y, Z, X = generate_data(n = 10000, c = 10, p = 5000, omega=[1, 2, 3, 1, 2, 3, 1, 2, 3, 1], sigma_b2 = 1, sigma_e2 = 1)
+    # y, Z, X = generate_data(n = 2000, c = 10, p = 500, omega=[1, 2, 3, 1, 2, 3, 1, 2, 3, 1], sigma_b2 = 1, sigma_e2 = 1)
     y, Z, X = load_data(path='data/lmm_y_z_x.txt')
 
     
@@ -68,5 +72,12 @@ if __name__ == '__main__':
     em_algorithm(y, Z, X, omega_init=np.zeros(10), sigma_b2_init=0.5, sigma_e2_init=0.5, max_iter=200, tol=1e-6, cv_folds=10)
 
     # lasso(y, Z, X, cv_folds=5)
+
+    # Ridge Regression
+    # X = np.hstack((Z, X))
+    # alpha = 0.01
+    # ridge = Ridge(alpha=alpha)
+    # ridge.fit(X, y)
+    # print(ridge.coef_[:10])
 
     

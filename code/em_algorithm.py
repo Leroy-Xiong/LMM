@@ -54,19 +54,26 @@ class EMAlgorithm:
 
         ZTZZT = np.linalg.inv(Z.T @ Z) @ Z.T
         XTX = X.T @ X
+        XTy = X.T @ y
+        XTZ = X.T @ Z
+        yTy = y.T @ y
+        yTZ = y.T @ Z
+        ZTZ = Z.T @ Z
+        yTX = y.T @ X
+        ZTX = Z.T @ X
         
         for _ in tqdm(range(self.max_iter)): 
 
             # E-step
             Sigma = np.linalg.inv(XTX / sigma_e2 + np.eye(p) / sigma_b2)
-            mu = Sigma @ X.T @ (y - Z @ omega) / sigma_e2
+            mu = Sigma @ (XTy - XTZ @ omega) / sigma_e2
             E_beta = mu
             E_beta2 = Sigma + np.outer(mu.T, mu)
             
             # M-step
             omega_new = ZTZZT @ (y - X @ E_beta)
             sigma_b2_new = np.trace(E_beta2) / p
-            sigma_e2_new = ((y - Z @ omega_new).T @ (y - Z @ omega_new) + np.trace(XTX @ E_beta2) - 2 * (y - Z @ omega_new).T @ X @ E_beta) / n
+            sigma_e2_new = ((yTy - 2 * yTZ @ omega_new + omega_new.T @ ZTZ @ omega_new) + np.trace(XTX @ E_beta2) - 2 * (yTX @ E_beta - omega_new.T @ ZTX @ E_beta)) / n
             
             # print(omega_new)
             # print(sigma_b2_new)
@@ -87,8 +94,7 @@ class EMAlgorithm:
             print(Theta_new)
 
             # Compute marginal likelihood
-            log_marginal_likelihood = (-(n + p) / 2 - 2 / p) * np.log(2 * np.pi) - n / 2 * np.log(sigma_e2) - p / 2 * np.log(sigma_b2) - 1 / (2 * sigma_e2) * (y - Z @ omega).T @ (y - Z @ omega) + 1 / 2 * mu.T @ np.linalg.inv(Sigma) @ mu
-            # log_marginal_likelihood = (-(n + p) / 2 - 2 / p) * np.log(2 * np.pi) - n / 2 * np.log(sigma_e2) - p / 2 * np.log(sigma_b2) - 2 * np.log(np.linalg.det(Sigma)) - 1 / (2 * sigma_e2) * (y - Z @ omega).T @ (y - Z @ omega) + 1 / 2 * mu.T @ np.linalg.inv(Sigma) @ mu
+            log_marginal_likelihood = -n / 2 * np.log(2 * np.pi * sigma_e2) - 1 / (2 * sigma_e2) * (y - Z @ omega_new - X @ E_beta).T @ (y - Z @ omega_new - X @ E_beta)
             print(log_marginal_likelihood)
             log_marginal_likelihoods.append(log_marginal_likelihood)
 
