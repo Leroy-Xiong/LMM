@@ -16,6 +16,8 @@ def load_data(path='lmm_y_z_x.txt'):
     y = data[:, 0]
     Z = data[:, 1:11]
     X = data[:, 11:]
+    # sample p columns from X
+    # X = X[:, np.random.choice(X.shape[1], 100, replace=False)]
 
     return y, Z, X
 
