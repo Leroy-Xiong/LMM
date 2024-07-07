@@ -44,4 +44,4 @@ $$
 $$ -->
 
 
-# Linear Mixed Model
+# EM Algorithm and Variational Inference for Linear Mixed Model

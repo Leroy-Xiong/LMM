@@ -76,6 +76,9 @@ class VariationalInference:
             for j in range(p):
                 s2[j] = (1 / sigma_e2 * X[:, j].T @ X[:, j] + 1 / sigma_b2) ** -1
                 m[j] = s2[j] / sigma_e2 * (y - Z @ omega).T @ X[:, j]
+
+            print(m)
+            print(s2)
             
             # M-step
             omega_new = ZTZZT @ (y - X @ m)

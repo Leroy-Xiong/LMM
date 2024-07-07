@@ -1,6 +1,8 @@
+import os
 import numpy as np
 from sklearn.linear_model import Ridge, ridge_regression
 from sklearn.metrics import mean_squared_error
+
 from code.cross_validation import cross_validate
 from code.em_algorithm import EMAlgorithm
 from code.lasso import ElasticNet, lambda_search
@@ -10,7 +12,9 @@ from code.variational_inference import VariationalInference
 
 def em_algorithm(y, Z, X, omega_init, sigma_b2_init, sigma_e2_init, max_iter=200, tol=1e-6, cv_folds=5):
 
-    y_train, Z_train, X_train, y_test, Z_test, X_test = split_train_test(y, Z, X, test_size=0.2)
+    # y_train, Z_train, X_train, y_test, Z_test, X_test = split_train_test(y, Z, X, test_size=0.2)
+
+    y_train, Z_train, X_train = y, Z, X
 
     # ---------------- EM algorithm ----------------
     em_params = {'max_iter': max_iter, 'tol': tol, 'omega': omega_init, 'sigma_b2': sigma_b2_init, 'sigma_e2': sigma_e2_init}
@@ -24,8 +28,8 @@ def em_algorithm(y, Z, X, omega_init, sigma_b2_init, sigma_e2_init, max_iter=200
 
     y_train_pred = em.predict(Z_train, X_train)
     print('EM Train MSE:', mean_squared_error(y_train, y_train_pred))
-    y_test_pred = em.predict(Z_test, X_test)
-    print('EM Test MSE:', mean_squared_error(y_test, y_test_pred))
+    # y_test_pred = em.predict(Z_test, X_test)
+    # print('EM Test MSE:', mean_squared_error(y_test, y_test_pred))
 
     # Plot marginal likelihood
     em.plot_marginal_likelihood('outputs/log_marginal_likelihoods.png')
@@ -41,7 +45,7 @@ def em_algorithm(y, Z, X, omega_init, sigma_b2_init, sigma_e2_init, max_iter=200
 
 def variational_inference(y, Z, X, omega_init, sigma_b2_init, sigma_e2_init, max_iter=200, tol=1e-6, cv_folds=5):
 
-    y_train, Z_train, X_train, y_test, Z_test, X_test = split_train_test(y, Z, X, test_size=0.2)
+    y_train, Z_train, X_train, y_test, Z_test, X_test = split_train_test(y, Z, X, test_size=0.1)
 
     # ---------------- EM algorithm ----------------
     vi_params = {'max_iter': max_iter, 'tol': tol, 'omega': omega_init, 'sigma_b2': sigma_b2_init, 'sigma_e2': sigma_e2_init}
@@ -61,12 +65,12 @@ def variational_inference(y, Z, X, omega_init, sigma_b2_init, sigma_e2_init, max
     vi.plot_marginal_likelihood('outputs/log_marginal_likelihoods_vi.png')
 
     # Cross validation
-    # cv_mses = cross_validate(y, Z, X, EMAlgorithm, em_params, n_splits=cv_folds)
+    cv_mses = cross_validate(y, Z, X, VariationalInference, vi_params, n_splits=cv_folds)
 
-    # print('CV Mean MSE:', np.mean(cv_mses))
-    # print('CV MSEs:', cv_mses)
+    print('CV Mean MSE:', np.mean(cv_mses))
+    print('CV MSEs:', cv_mses)
 
-    # np.save('outputs/em_cv_mses.npy', cv_mses)
+    np.save('outputs/vi_cv_mses.npy', cv_mses)
     
 
 def lasso(y, Z, X, cv_folds=10):
@@ -96,14 +100,14 @@ def lasso(y, Z, X, cv_folds=10):
 if __name__ == '__main__':
     omega = np.array([1, 2, 3, 1, 2, 3, 1, 2, 3, 1])
     # omega = omega / 10.0
-    y, Z, X = generate_data(n = 2000, c = 10, p = 5000, omega=omega, sigma_b2 = 1, sigma_e2 = 1)
-    # y, Z, X = load_data(path='data/lmm_y_z_x.txt')
+    # y, Z, X = generate_data(n = 2000, c = 10, p = 500, omega=omega, sigma_b2 = 1, sigma_e2 = 1)
+    y, Z, X = load_data(path='data/lmm_y_z_x.txt')
 
     
 
-    # em_algorithm(y, Z, X, omega_init=np.zeros(10), sigma_b2_init=0.5, sigma_e2_init=0.5, max_iter=200, tol=1e-6, cv_folds=10)
+    em_algorithm(y, Z, X, omega_init=np.zeros(10), sigma_b2_init=1, sigma_e2_init=1, max_iter=2000, tol=1e-3, cv_folds=10)
 
-    # lasso(y, Z, X, cv_folds=5)
+    # lasso(y, Z, X, cv_folds=10)
 
     # Ridge Regression
     # X = np.hstack((Z, X))
@@ -113,6 +117,6 @@ if __name__ == '__main__':
     # print(ridge.coef_[:10])
 
 
-    variational_inference(y, Z, X, omega_init=np.zeros(10), sigma_b2_init=0.5, sigma_e2_init=0.5, max_iter=200, tol=1e-6, cv_folds=5)
+    # variational_inference(y, Z, X, omega_init=np.zeros(10), sigma_b2_init=0.5, sigma_e2_init=0.5, max_iter=200, tol=1e-6, cv_folds=10)
 
     

@@ -3,7 +3,7 @@ import sys
 import warnings
 import numpy as np
 from scipy import sparse
-from code.cross_validation import cross_validate
+from .cross_validation import cross_validate
 from sklearn.base import RegressorMixin, MultiOutputMixin
 from sklearn.utils.validation import (
     _check_sample_weight,
