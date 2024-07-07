@@ -96,8 +96,8 @@ def lasso(y, Z, X, cv_folds=10):
 if __name__ == '__main__':
     omega = np.array([1, 2, 3, 1, 2, 3, 1, 2, 3, 1])
     # omega = omega / 10.0
-    y, Z, X = generate_data(n = 10000, c = 10, p = 1000, omega=omega, sigma_b2 = 1, sigma_e2 = 1)
-    # y, Z, X = load_data(path='data/lmm_y_z_x.txt')
+    # y, Z, X = generate_data(n = 10000, c = 10, p = 1000, omega=omega, sigma_b2 = 1, sigma_e2 = 1)
+    y, Z, X = load_data(path='data/lmm_y_z_x.txt')
 
     
 

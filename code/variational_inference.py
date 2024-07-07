@@ -80,7 +80,7 @@ class VariationalInference:
             # M-step
             omega_new = ZTZZT @ (y - X @ m)
             sigma_b2_new = (m.T @ m + np.sum(s2)) / p
-            sigma_e2_new = ((y - Z @ omega_new - X @ m).T @ (y - Z @ omega_new - X @ m) + np.trace(X @ np.diag(s2) @ X.T)) / n
+            sigma_e2_new = ((y - Z @ omega_new - X @ m).T @ (y - Z @ omega_new - X @ m) + np.trace(XTX @ np.diag(s2))) / n
 
             # break
             Theta_new = np.hstack((omega_new, sigma_b2_new, sigma_e2_new))
@@ -106,12 +106,13 @@ class VariationalInference:
         self.c = c
         self.log_marginal_likelihoods = log_marginal_likelihoods
         self.Theta = Theta
+        self.m = m
 
         return log_marginal_likelihoods, Theta
 
     def predict(self, Z, X):
         omega = self.Theta[:self.c]
-        E_beta = self.E_beta
+        E_beta = self.m
 
         y_hat = Z @ omega + X @ E_beta
 
