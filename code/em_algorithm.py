@@ -2,6 +2,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 from sklearn.linear_model import LinearRegression
 from tqdm import tqdm
+from scipy.stats import multivariate_normal
 
 
 class EMAlgorithm:
@@ -11,73 +12,7 @@ class EMAlgorithm:
         self.omega_init = omega
         self.sigma_b2_init = sigma_b2
         self.sigma_e2_init = sigma_e2
-    def fit_2(self, y, Z, X):
-
-
-        n, c = Z.shape
-        _, p = X.shape
-        
-        # Initialize parameters
-        omega = self.omega_init
-        sigma_b2 = self.sigma_b2_init
-        sigma_e2 = self.sigma_e2_init
-        Theta = np.hstack((omega, sigma_b2, sigma_e2))
-        
-        log_marginal_likelihoods = []
-
-        ZTZZT = np.linalg.inv(Z.T @ Z) @ Z.T
-        XTX = X.T @ X
-        XTy = X.T @ y
-        XTZ = X.T @ Z
-        yTy = y.T @ y
-        yTZ = y.T @ Z
-        ZTZ = Z.T @ Z
-        yTX = y.T @ X
-        ZTX = Z.T @ X
-        
-        for _ in tqdm(range(self.max_iter)): 
-
-            # E-step
-            Sigma = np.linalg.inv(XTX / sigma_e2 + np.eye(p) / sigma_b2)
-            mu = Sigma @ (XTy - XTZ @ omega) / sigma_e2
-            E_beta = mu
-            E_beta2 = Sigma + np.outer(mu.T, mu)
-            
-            # M-step
-            omega_new = ZTZZT @ (y - X @ E_beta)
-            sigma_b2_new = np.trace(E_beta2) / p
-            sigma_e2_new = ((yTy - 2 * yTZ @ omega_new + omega_new.T @ ZTZ @ omega_new) + np.trace(XTX @ E_beta2) - 2 * (yTX @ E_beta - omega_new.T @ ZTX @ E_beta)) / n
-            
-            # print(omega_new)
-            # print(sigma_b2_new)
-            # print(sigma_e2_new)
-
-            # break
-            Theta_new = np.hstack((omega_new, sigma_b2_new, sigma_e2_new))
-        
-            # Check for convergence
-            if np.linalg.norm(Theta_new - Theta) < self.tol:
-                break
-
-            # Update parameters
-            omega = omega_new
-            sigma_e2 = sigma_e2_new
-            sigma_b2 = sigma_b2_new
-            Theta = Theta_new
-            print(Theta_new)
-
-            # Compute marginal likelihood
-            log_marginal_likelihood = -n / 2 * np.log(2 * np.pi * sigma_e2) - 1 / (2 * sigma_e2) * (y - Z @ omega_new - X @ E_beta).T @ (y - Z @ omega_new - X @ E_beta)
-            print(log_marginal_likelihood)
-            log_marginal_likelihoods.append(log_marginal_likelihood)
-
-        self.n = n
-        self.p = p
-        self.c = c
-        self.log_marginal_likelihoods = log_marginal_likelihoods
-        self.Theta = Theta
-        self.E_beta = E_beta
-        return log_marginal_likelihoods, Theta, E_beta
+    
 
     def fit(self, y, Z, X):
         """
@@ -131,8 +66,11 @@ class EMAlgorithm:
 
             # E-step
             Diag = XXT_eigen_values / sigma_e2 + 1 / sigma_b2
+
             mu = 1 / sigma_e2 * X.T @ (XXT_eigen_vectors @ (XXT_eigen_vectors.T @ (y - Z @ omega) / Diag))
+
             SigmaXTX_tr = np.sum(1 / (1 + sigma_e2 / sigma_b2 / XXT_eigen_values)) * sigma_e2
+
             Sigma_tr = (np.sum(1 / (XXT_eigen_values + sigma_e2 / sigma_b2)) + (p - n) / (sigma_e2 / sigma_b2)) * sigma_e2
 
             muTmu = mu.T @ mu

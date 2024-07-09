@@ -10,6 +10,13 @@ class VariationalInference:
         self.omega_init = omega
         self.sigma_b2_init = sigma_b2
         self.sigma_e2_init = sigma_e2
+        self.n = None
+        self.p = None
+        self.c = None
+        self.log_marginal_likelihoods = None
+        self.Theta = None
+        self.m = None
+
     def fit(self, y, Z, X):
         """
         EM algorithm for estimating the parameters of linear mixed model with Gaussian noise
@@ -57,6 +64,7 @@ class VariationalInference:
 
         ZTZZT = np.linalg.inv(Z.T @ Z) @ Z.T
         XTX = X.T @ X
+        XXT = X @ X.T
         XTy = X.T @ y
         XTZ = X.T @ Z
         yTy = y.T @ y
@@ -64,8 +72,11 @@ class VariationalInference:
         ZTZ = Z.T @ Z
         yTX = y.T @ X
         ZTX = Z.T @ X
+        XTX_tr = np.trace(XTX)
 
         XTX_diag_inv = np.reciprocal(np.diag(XTX))
+
+        XXT_eigen_values, XXT_eigen_vectors = np.linalg.eig(XXT)
         
         for _ in tqdm(range(self.max_iter)): 
             
@@ -74,16 +85,22 @@ class VariationalInference:
 
             # E-step
             for j in range(p):
-                s2[j] = (1 / sigma_e2 * X[:, j].T @ X[:, j] + 1 / sigma_b2) ** -1
-                m[j] = s2[j] / sigma_e2 * (y - Z @ omega).T @ X[:, j]
+                s2[j] = (XTX_tr / sigma_e2 + 1 / sigma_b2) ** -1
+                A = (y - Z @ omega).T @ X
+                m[j] = s2[j] / sigma_e2 * A[j]
 
-            print(m)
-            print(s2)
+
+            # Compute marginal likelihood
+            Diag = XXT_eigen_values / sigma_e2 + 1 / sigma_b2
+            log_marginal_likelihood = -np.sum(np.log(Diag)) / 2 - n / 2 * np.log(sigma_b2) - n / 2 * np.log(sigma_e2) - n / 2 * np.log(2 * np.pi) - 1 / 2 * np.sum((y - Z @ omega) ** 2 / Diag)
+            print(log_marginal_likelihood)
+
+            log_marginal_likelihoods.append(log_marginal_likelihood)
             
             # M-step
             omega_new = ZTZZT @ (y - X @ m)
-            sigma_b2_new = (m.T @ m + np.sum(s2)) / p
-            sigma_e2_new = ((y - Z @ omega_new - X @ m).T @ (y - Z @ omega_new - X @ m) + np.trace(XTX @ np.diag(s2))) / n
+            sigma_e2_new = ((y - Z @ omega_new - X @ m).T @ (y - Z @ omega - X @ m) + np.trace(X @ np.diag(s2) @ X.T)) / n
+            sigma_b2_new = (m.T @ m + np.sum(s2)) / p  
 
             # break
             Theta_new = np.hstack((omega_new, sigma_b2_new, sigma_e2_new))
@@ -99,17 +116,14 @@ class VariationalInference:
             Theta = Theta_new
             print(Theta_new)
 
-            # Compute marginal likelihood
-            # log_marginal_likelihood = -n / 2 * np.log(2 * np.pi * sigma_e2) - 1 / (2 * sigma_e2) * (y - Z @ omega_new - X @ E_beta).T @ (y - Z @ omega_new - X @ E_beta)
-            # print(log_marginal_likelihood)
-            # log_marginal_likelihoods.append(log_marginal_likelihood)
-
         self.n = n
         self.p = p
         self.c = c
         self.log_marginal_likelihoods = log_marginal_likelihoods
         self.Theta = Theta
         self.m = m
+
+        np.savetxt('outputs/log_marginal_likelihoods.csv', log_marginal_likelihoods, delimiter=',')
 
         return log_marginal_likelihoods, Theta
 
@@ -122,6 +136,8 @@ class VariationalInference:
         return y_hat
 
     def plot_marginal_likelihood(self, save_path):
+        if self.log_marginal_likelihoods is None:
+            self.log_marginal_likelihoods = np.genfromtxt('outputs/vi_log_marginal_likelihoods.csv')
         plt.figure(figsize=(5, 3), dpi=300)
         plt.plot(self.log_marginal_likelihoods)
         plt.xlabel('Iteration')

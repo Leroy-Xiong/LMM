@@ -3,7 +3,8 @@ import sys
 import warnings
 import numpy as np
 from scipy import sparse
-from .cross_validation import cross_validate
+from tqdm import tqdm
+from .utils import cross_validate
 from sklearn.base import RegressorMixin, MultiOutputMixin
 from sklearn.utils.validation import (
     _check_sample_weight,
@@ -902,7 +903,7 @@ class ElasticNet(MultiOutputMixin, RegressorMixin, LinearModel):
 
 
 
-def lambda_search(y, Z, X, model, lasso_params, lambda_list = np.arange(0.0001, 0.001 + 0.0001, 0.0001), save_path='cv_mses_all.npy', cv_folds=10):
+def lambda_search(y, Z, X, model, lasso_params, lambda_list = np.arange(0.0001, 0.001 + 0.0001, 0.0001), save_path='cv_mses_all.csv', cv_folds=10):
     """
     Perform cross-validation to find the best lambda for the LASSO model
     """
@@ -910,12 +911,12 @@ def lambda_search(y, Z, X, model, lasso_params, lambda_list = np.arange(0.0001, 
     cv_mses_all = np.zeros((len(lambda_list), cv_folds + 1))
     cv_mses_all[:, 0] = lambda_list
    
-    for i, l in enumerate(lambda_list):
+    for i, l in tqdm(enumerate(lambda_list), total=len(lambda_list), desc='Lambda Search'):
         lasso_params['alpha'] = l
         cv_mses = cross_validate(y, Z, X, model, lasso_params, n_splits=cv_folds)
         cv_mses_all[i, 1:] = cv_mses
 
-    np.save(save_path, cv_mses_all)
+    np.savetxt(save_path, cv_mses_all, delimiter=',')
 
     average_values = np.mean(cv_mses_all[:, 1:], axis=1)
     min_average_index = np.argmin(average_values)
