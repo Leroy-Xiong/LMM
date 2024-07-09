@@ -102,10 +102,10 @@ if __name__ == '__main__':
 
     # lasso(y, Z, X, cv_folds=10)
 
-    cv_boxplot(cv_mses_dirs=['outputs/em_cv_mses.csv', 'outputs/lasso_cv_mses.csv'], save_path='outputs/cv_boxplot.png', labels=['EM', 'LASSO'])    
+    # cv_boxplot(cv_mses_dirs=['outputs/em_cv_mses.csv', 'outputs/lasso_cv_mses.csv'], save_path='outputs/cv_boxplot.png', labels=['EM', 'LASSO'])    
 
-    # variational_inference(y, Z, X, omega_init=np.zeros(10), sigma_b2_init=1, sigma_e2_init=0.5, max_iter=100, tol=1e-6, cv_folds=10)
+    variational_inference(y, Z, X, omega_init=np.zeros(10), sigma_b2_init=1, sigma_e2_init=0.5, max_iter=100, tol=1e-6, cv_folds=10)
 
-    cv_boxplot(cv_mses_dirs=['outputs/em_cv_mses.csv', 'outputs/lasso_cv_mses.csv', 'outputs/vi_cv_mses.csv'], save_path='outputs/cv_boxplot_2.png', labels=['EM', 'LASSO', 'VI'])
+    # cv_boxplot(cv_mses_dirs=['outputs/em_cv_mses.csv', 'outputs/lasso_cv_mses.csv', 'outputs/vi_cv_mses.csv'], save_path='outputs/cv_boxplot_2.png', labels=['EM', 'LASSO', 'VI'])
 
     

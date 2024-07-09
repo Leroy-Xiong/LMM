@@ -70,7 +70,6 @@ class VariationalInference:
         ELBOs = []
 
         ZTZZT = np.linalg.inv(Z.T @ Z) @ Z.T
-        XTX = X.T @ X
         XXT = X @ X.T
 
         XXT_eigen_values, _ = np.linalg.eig(XXT)
@@ -109,7 +108,7 @@ class VariationalInference:
 
             E_1 = -(n + p) / 2 * np.log(2 * np.pi) - n / 2 * np.log(sigma_e2) - p / 2 * np.log(sigma_b2) - 1 / (2 * sigma_e2) * (y - Z @ omega).T @ (y - Z @ omega) + 1 / sigma_e2 * (y - Z @ omega).T @ X @ m - 1 / (2 * sigma_e2) * (np.trace(X @ np.diag(s2) @ X.T) + m.T @ X.T @ X @ m) - 1 / (2 * sigma_b2) * (np.sum(s2) + m.T @ m)
             E_2 = -p / 2 * np.log(2 * np.pi) - 1 / 2 * np.sum(np.log(s2)) - p / 2
-            ELBO = E_1 + E_2 + 1000
+            ELBO = E_1 + E_2 + 10000
 
             log_marginal_likelihoods.append(log_marginal_likelihood)
             ELBOs.append(ELBO)
@@ -120,8 +119,8 @@ class VariationalInference:
         self.n = n
         self.p = p
         self.c = c
-        self.log_marginal_likelihoods = log_marginal_likelihoods
-        self.ELBOs = ELBOs
+        self.log_marginal_likelihoods = np.array(log_marginal_likelihoods)
+        self.ELBOs = np.array(ELBOs)
         self.Theta = Theta
         self.m = m
 
@@ -147,8 +146,9 @@ class VariationalInference:
         plt.figure(figsize=(5, 4), dpi=300)
         plt.plot(self.log_marginal_likelihoods)
         plt.plot(self.ELBOs)
-        plt.legend(['Log Marginal Likelihood', 'ELBO'])
+        plt.legend(['Evidence', 'ELBO'])
         plt.xlabel('Iteration')
+        # plt.yscale('symlog')
         plt.savefig(save_path, bbox_inches='tight')
         plt.close()
 
