@@ -15,6 +15,7 @@ class VariationalInference:
         self.p = None
         self.c = None
         self.log_marginal_likelihoods = None
+        self.ELBOs = None
         self.Theta = None
         self.m = None
 
@@ -66,6 +67,7 @@ class VariationalInference:
         s2 = np.ones(p)
         
         log_marginal_likelihoods = []
+        ELBOs = []
 
         ZTZZT = np.linalg.inv(Z.T @ Z) @ Z.T
         XTX = X.T @ X
@@ -82,9 +84,6 @@ class VariationalInference:
             for j in range(p):
                 s2[j] = (X[:, j].T @ X[:, j] / sigma_e2 + 1 / sigma_b2) ** -1
                 m[j] = s2[j] / sigma_e2 * (y - Z @ omega).T @ X[:, j]
-
-
-            
             
             # M-step
             omega_new = ZTZZT @ (y - X @ m)
@@ -108,16 +107,26 @@ class VariationalInference:
             Diag = XXT_eigen_values / sigma_e2 + 1 / sigma_b2
             log_marginal_likelihood = -np.sum(np.log(Diag)) / 2 - n / 2 * np.log(sigma_b2) - n / 2 * np.log(sigma_e2) - n / 2 * np.log(2 * np.pi) - 1 / 2 * np.sum((y - Z @ omega) ** 2 / Diag)
 
+            E_1 = -(n + p) / 2 * np.log(2 * np.pi) - n / 2 * np.log(sigma_e2) - p / 2 * np.log(sigma_b2) - 1 / (2 * sigma_e2) * (y - Z @ omega).T @ (y - Z @ omega) + 1 / sigma_e2 * (y - Z @ omega).T @ X @ m - 1 / (2 * sigma_e2) * (np.trace(X @ np.diag(s2) @ X.T) + m.T @ X.T @ X @ m) - 1 / (2 * sigma_b2) * (np.sum(s2) + m.T @ m)
+            E_2 = -p / 2 * np.log(2 * np.pi) - 1 / 2 * np.sum(np.log(s2)) - p / 2
+            ELBO = E_1 + E_2 + 1000
+
             log_marginal_likelihoods.append(log_marginal_likelihood)
+            ELBOs.append(ELBO)
+
+            print(log_marginal_likelihood)
+            print(ELBO)
 
         self.n = n
         self.p = p
         self.c = c
         self.log_marginal_likelihoods = log_marginal_likelihoods
+        self.ELBOs = ELBOs
         self.Theta = Theta
         self.m = m
 
-        np.savetxt('outputs/log_marginal_likelihoods.csv', log_marginal_likelihoods, delimiter=',')
+        np.savetxt('outputs/log_marginal_likelihoods_vi.csv', log_marginal_likelihoods, delimiter=',')
+        np.savetxt('outputs/ELBOs.csv', ELBOs, delimiter=',')
 
         return log_marginal_likelihoods, Theta
 
@@ -129,12 +138,29 @@ class VariationalInference:
 
         return y_hat
 
-    def plot_marginal_likelihood(self, save_path):
+    def plot_marginal_likelihood_and_elbo(self, save_path):
         if self.log_marginal_likelihoods is None:
-            self.log_marginal_likelihoods = np.genfromtxt('outputs/vi_log_marginal_likelihoods.csv')
-        plt.figure(figsize=(5, 3), dpi=300)
+            self.log_marginal_likelihoods = np.genfromtxt('outputs/log_marginal_likelihoods_vi.csv')
+        if self.ELBOs is None:
+            self.ELBOs = np.genfromtxt('outputs/ELBOs.csv')
+
+        plt.figure(figsize=(5, 4), dpi=300)
         plt.plot(self.log_marginal_likelihoods)
+        plt.plot(self.ELBOs)
+        plt.legend(['Log Marginal Likelihood', 'ELBO'])
         plt.xlabel('Iteration')
-        plt.ylabel('Log Marginal Likelihood')
+        plt.savefig(save_path, bbox_inches='tight')
+        plt.close()
+
+    def plot_gap(self, save_path):
+        """
+        Plot the gap between the log marginal likelihood and the ELBO.
+        :param save_path: The path to save the plot.
+        :return: None
+        """
+        plt.figure(figsize=(5, 4), dpi=300)
+        plt.plot(self.log_marginal_likelihoods - self.ELBOs, color='green')
+        plt.xlabel('Iteration')
+        plt.ylabel('Gap')
         plt.savefig(save_path, bbox_inches='tight')
         plt.close()

@@ -83,7 +83,7 @@ def cv_boxplot_2(cv_mses, save_path='boxplot.png', labels=['Lasso', 'EM', 'VI'])
     fig, ax = plt.subplots(figsize=(5, 3), dpi=300)
     ax.boxplot(cv_mses, labels=labels)
     ax.set_ylabel('MSE')
-    ax.set_title('Cross Validation Results')
+    ax.set_title('10-fold Cross Validation Results')
     plt.savefig(save_path, bbox_inches='tight')
     plt.close()
 

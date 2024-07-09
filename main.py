@@ -12,35 +12,29 @@ from code.variational_inference import VariationalInference
 
 def em_algorithm(y, Z, X, omega_init, sigma_b2_init, sigma_e2_init, max_iter=200, tol=1e-6, cv_folds=5):
 
-    # y_train, Z_train, X_train, y_test, Z_test, X_test = split_train_test(y, Z, X, test_size=0.2)
-
-    y_train, Z_train, X_train = y, Z, X
-
     # ---------------- EM algorithm ----------------
     em_params = {'max_iter': max_iter, 'tol': tol, 'omega': omega_init, 'sigma_b2': sigma_b2_init, 'sigma_e2': sigma_e2_init}
     em = EMAlgorithm(**em_params)
 
-    log_marginal_likelihoods, Theta, E_beta = em.fit(y_train, Z_train, X_train)
+    log_marginal_likelihoods, Theta, E_beta = em.fit(y, Z, X)
 
     print("Log marginal likelihoods:", log_marginal_likelihoods)
     print("Estimate of Theta:", Theta)
     # print("Posterior mean of beta:", E_beta)
 
-    y_train_pred = em.predict(Z_train, X_train)
-    print('EM Train MSE:', mean_squared_error(y_train, y_train_pred))
-    # y_test_pred = em.predict(Z_test, X_test)
-    # print('EM Test MSE:', mean_squared_error(y_test, y_test_pred))
+    y_train_pred = em.predict(Z, X)
+    print('EM Train MSE:', mean_squared_error(y, y_train_pred))
 
     # Plot marginal likelihood
     em.plot_marginal_likelihood('outputs/log_marginal_likelihoods.png')
 
     # Cross validation
-    # cv_mses = cross_validate(y, Z, X, EMAlgorithm, em_params, n_splits=cv_folds)
+    cv_mses = cross_validate(y, Z, X, EMAlgorithm, em_params, n_splits=cv_folds)
 
-    # print('CV Mean MSE:', np.mean(cv_mses))
-    # print('CV MSEs:', cv_mses)
+    print('CV Mean MSE:', np.mean(cv_mses))
+    print('CV MSEs:', cv_mses)
 
-    # np.savetxt('outputs/em_cv_mses.csv', cv_mses, delimiter=',')
+    np.savetxt('outputs/em_cv_mses.csv', cv_mses, delimiter=',')
 
 
 def variational_inference(y, Z, X, omega_init, sigma_b2_init, sigma_e2_init, max_iter=200, tol=1e-6, cv_folds=5):
@@ -49,24 +43,25 @@ def variational_inference(y, Z, X, omega_init, sigma_b2_init, sigma_e2_init, max
     vi_params = {'max_iter': max_iter, 'tol': tol, 'omega': omega_init, 'sigma_b2': sigma_b2_init, 'sigma_e2': sigma_e2_init}
     vi = VariationalInference(**vi_params)
 
-    log_marginal_likelihoods, Theta = vi.fit(y, Z, X)
+    # log_marginal_likelihoods, Theta = vi.fit(y, Z, X)
   
-    print("Log marginal likelihoods:", log_marginal_likelihoods)
-    print("Estimate of Theta:", Theta)
+    # print("Log marginal likelihoods:", log_marginal_likelihoods)
+    # print("Estimate of Theta:", Theta)
 
-    y_train_pred = vi.predict(Z, X)
-    print('EM Train MSE:', mean_squared_error(y, y_train_pred))
+    # y_train_pred = vi.predict(Z, X)
+    # print('EM Train MSE:', mean_squared_error(y, y_train_pred))
 
     # Plot marginal likelihood
-    vi.plot_marginal_likelihood('outputs/log_marginal_likelihoods_vi.png')
+    vi.plot_marginal_likelihood_and_elbo('outputs/log_marginal_likelihoods_vi.png')
+    vi.plot_gap('outputs/gap.png')
 
     # Cross validation
-    cv_mses = cross_validate(y, Z, X, VariationalInference, vi_params, n_splits=cv_folds)
+    # cv_mses = cross_validate(y, Z, X, VariationalInference, vi_params, n_splits=cv_folds)
 
-    print('CV Mean MSE:', np.mean(cv_mses))
-    print('CV MSEs:', cv_mses)
+    # print('CV Mean MSE:', np.mean(cv_mses))
+    # print('CV MSEs:', cv_mses)
 
-    np.savetxt('outputs/vi_cv_mses.csv', cv_mses, delimiter=',')
+    # np.savetxt('outputs/vi_cv_mses.csv', cv_mses, delimiter=',')
 
     
 
@@ -107,7 +102,7 @@ if __name__ == '__main__':
 
     # lasso(y, Z, X, cv_folds=10)
 
-    # cv_boxplot(cv_mses_dirs=['outputs/em_cv_mses.csv', 'outputs/lasso_cv_mses.csv'], save_path='outputs/cv_boxplot.png', labels=['EM', 'LASSO'])    
+    cv_boxplot(cv_mses_dirs=['outputs/em_cv_mses.csv', 'outputs/lasso_cv_mses.csv'], save_path='outputs/cv_boxplot.png', labels=['EM', 'LASSO'])    
 
     # variational_inference(y, Z, X, omega_init=np.zeros(10), sigma_b2_init=1, sigma_e2_init=0.5, max_iter=100, tol=1e-6, cv_folds=10)
 
