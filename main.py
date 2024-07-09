@@ -99,12 +99,8 @@ def lasso(y, Z, X, cv_folds=10):
 
 
 if __name__ == '__main__':
-    omega = np.array([-1, 2, -3, 1, -2, 3, -1, 2, -3, 1])
-    # omega = omega / 100.0
-    # omega = [-4.34232671e-04, -4.36072309e-02, -5.21779989e-02, -1.10921390e-02, 5.28039854e-02, 2.24489587e-02, 5.11428609e-02, -1.37524736e-02, 2.27649024e-02, -3.88254831e-02]
-    # y, Z, X = generate_data(n = 2000, c = 10, p = 500, omega=omega, sigma_b2 = 0.25, sigma_e2 = 0.75)
-    y, Z, X = load_data(path='data/lmm_y_z_x.txt')
 
+    y, Z, X = load_data(path='data/lmm_y_z_x.txt')
 
     # em_algorithm(y, Z, X, omega_init=np.zeros(10), sigma_b2_init=0.5, sigma_e2_init=0.5, max_iter=1000, tol=1e-2, cv_folds=10)
 
@@ -113,8 +109,7 @@ if __name__ == '__main__':
 
     # cv_boxplot(cv_mses_dirs=['outputs/em_cv_mses.csv', 'outputs/lasso_cv_mses.csv'], save_path='outputs/cv_boxplot.png', labels=['EM', 'LASSO'])    
 
-
-    variational_inference(y, Z, X, omega_init=np.zeros(10), sigma_b2_init=1, sigma_e2_init=0.5, max_iter=100, tol=1e-6, cv_folds=10)
+    # variational_inference(y, Z, X, omega_init=np.zeros(10), sigma_b2_init=1, sigma_e2_init=0.5, max_iter=100, tol=1e-6, cv_folds=10)
 
     cv_boxplot(cv_mses_dirs=['outputs/em_cv_mses.csv', 'outputs/lasso_cv_mses.csv', 'outputs/vi_cv_mses.csv'], save_path='outputs/cv_boxplot_2.png', labels=['EM', 'LASSO', 'VI'])
 
