@@ -56,9 +56,12 @@ class EMAlgorithm:
         sigma_e2 = np.sum(residuals ** 2) / (n - c)
 
         sigma_b2 = self.sigma_b2_init
+
+        Theta = np.hstack((omega, sigma_b2, sigma_e2))
         
         log_marginal_likelihoods = []
 
+        ZTZZT = np.linalg.inv(Z.T @ Z) @ Z.T
         XXT = X @ X.T
         XXT_eigen_values, XXT_eigen_vectors = np.linalg.eig(XXT)
         
@@ -77,18 +80,20 @@ class EMAlgorithm:
             Xmu = X @ mu
 
             # Compute marginal likelihood
-            log_marginal_likelihood = -np.sum(np.log(Diag)) / 2 - n / 2 * np.log(sigma_b2) - n / 2 * np.log(sigma_e2) - n / 2 * np.log(2 * np.pi) - 1 / 2 * np.sum((y - Z @ omega) ** 2 / Diag)
-
-            # Check for convergence
-            if len(log_marginal_likelihoods) > 0 and np.abs(log_marginal_likelihood - log_marginal_likelihoods[-1]) < self.tol:
-                break
+            log_marginal_likelihood = -np.sum(np.log(Diag)) / 2 - n / 2 * np.log(sigma_b2) - n / 2 * np.log(sigma_e2) - n / 2 * np.log(2 * np.pi) - 1 / 2 * np.sum((y - Z @ omega) ** 2 / Diag) 
 
             log_marginal_likelihoods.append(log_marginal_likelihood)
             
             # M-step
-            omega = np.linalg.solve(Z.T @ Z, Z.T) @ (y - X @ mu)
-            sigma_e2 = ((y - Z @ omega - Xmu).T @ (y - Z @ omega - Xmu) + SigmaXTX_tr) / n
-            sigma_b2 = (muTmu + Sigma_tr) / p   
+            omega_new = ZTZZT @ (y - X @ mu)
+            sigma_e2_new = ((y - Z @ omega_new - Xmu).T @ (y - Z @ omega_new - Xmu) + SigmaXTX_tr) / n
+            sigma_b2_new = (muTmu + Sigma_tr) / p   
+
+            Theta_new = np.hstack((omega_new, sigma_b2_new, sigma_e2_new))
+
+            # Check for convergence
+            if np.linalg.norm(Theta_new - Theta) < self.tol:
+                break
 
         
 
