@@ -9,7 +9,7 @@ Consider a dataset $\{\boldsymbol{y}, \boldsymbol{Z}, \boldsymbol{X}\}$ with $n$
 
 $$\boldsymbol{y} = \boldsymbol{Z}\boldsymbol{\omega} + \boldsymbol{X}\boldsymbol{\beta} + \boldsymbol{e},$$
 
-where $\boldsymbol{y} \in \mathbb{R}^c$ is the vector of fixed effects, $\boldsymbol{\beta} \in \mathbb{R}^p$ is the vector of random effects with $\boldsymbol{\beta} \sim \mathbb{N}(0, \sigma^2_\beta \boldsymbol{I}_p)$, and $\boldsymbol{e} \sim \mathbb{N}(0, \sigma^2_e \boldsymbol{I})$ is the independent noise term. Let $\boldsymbol{\Theta}$ denote
+where $\boldsymbol{y} \in \mathbb{R}^c$ is the vector of fixed effects, $\boldsymbol{\beta} \in \mathbb{R}^p$ is the vector of random effects with, and $\boldsymbol{e} \sim \mathbb{N}(0, \sigma^2_e \boldsymbol{I})$ is the independent noise term. Let $\boldsymbol{\Theta}$ denote
 the set of unknown parameters $\boldsymbol{\Theta} = \{\boldsymbol{\omega, \sigma^2_e, \sigma^2_\beta}\}$. We can treat $\boldsymbol{\beta}$ as a latent variable
 because it is unobserved.
 
