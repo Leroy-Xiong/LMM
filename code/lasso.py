@@ -123,7 +123,7 @@ def enet_coordinate_descent(
                 const = 1.0
                 gap = R_norm2
 
-            l1_norm = np.sum(np.abs(w[b_index:]))
+            l1_norm = np.sum(np.abs(w))
 
             gap += l1_norm - const * np.dot(R, y)
         

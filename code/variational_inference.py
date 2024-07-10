@@ -71,6 +71,7 @@ class VariationalInference:
 
         ZTZZT = np.linalg.inv(Z.T @ Z) @ Z.T
         XXT = X @ X.T
+        XTX = X.T @ X
 
         XXT_eigen_values, _ = np.linalg.eig(XXT)
         
@@ -81,13 +82,13 @@ class VariationalInference:
 
             # E-step
             for j in range(p):
-                s2[j] = (X[:, j].T @ X[:, j] / sigma_e2 + 1 / sigma_b2) ** -1
+                s2[j] = 1 / (X[:, j].T @ X[:, j] / sigma_e2 + 1 / sigma_b2)
                 m[j] = s2[j] / sigma_e2 * (y - Z @ omega).T @ X[:, j]
             
             # M-step
             omega_new = ZTZZT @ (y - X @ m)
             sigma_b2_new = (m.T @ m + np.sum(s2)) / p  
-            sigma_e2_new = ((y - Z @ omega_new - X @ m).T @ (y - Z @ omega - X @ m) + np.trace(X @ np.diag(s2) @ X.T)) / n
+            sigma_e2_new = ((y - Z @ omega_new - X @ m).T @ (y - Z @ omega - X @ m) + np.trace(np.diag(s2) @ XTX)) / n
 
             # break
             Theta_new = np.hstack((omega_new, sigma_b2_new, sigma_e2_new))
@@ -102,19 +103,25 @@ class VariationalInference:
             sigma_b2 = sigma_b2_new
             Theta = Theta_new
 
+            print(Theta)
+            print(np.mean(m))
+            print(np.mean(s2))
+
             # Compute marginal likelihood
-            Diag = XXT_eigen_values / sigma_e2 + 1 / sigma_b2
-            log_marginal_likelihood = -np.sum(np.log(Diag)) / 2 - n / 2 * np.log(sigma_b2) - n / 2 * np.log(sigma_e2) - n / 2 * np.log(2 * np.pi) - 1 / 2 * np.sum((y - Z @ omega) ** 2 / Diag)
+            # Diag = XXT_eigen_values / sigma_e2 + 1 / sigma_b2
 
-            E_1 = -(n + p) / 2 * np.log(2 * np.pi) - n / 2 * np.log(sigma_e2) - p / 2 * np.log(sigma_b2) - 1 / (2 * sigma_e2) * (y - Z @ omega).T @ (y - Z @ omega) + 1 / sigma_e2 * (y - Z @ omega).T @ X @ m - 1 / (2 * sigma_e2) * (np.trace(X @ np.diag(s2) @ X.T) + m.T @ X.T @ X @ m) - 1 / (2 * sigma_b2) * (np.sum(s2) + m.T @ m)
-            E_2 = -p / 2 * np.log(2 * np.pi) - 1 / 2 * np.sum(np.log(s2)) - p / 2
-            ELBO = E_1 + E_2 + 10000
+            # log_marginal_likelihood = -np.sum(np.log(Diag)) / 2 - n / 2 * np.log(sigma_b2) - n / 2 * np.log(sigma_e2) - n / 2 * np.log(2 * np.pi) - 1 / 2 * np.sum((y - Z @ omega) ** 2 / Diag)
 
-            log_marginal_likelihoods.append(log_marginal_likelihood)
-            ELBOs.append(ELBO)
 
-            print(log_marginal_likelihood)
-            print(ELBO)
+            # E_1 = -(n + p) / 2 * np.log(2 * np.pi) - n / 2 * np.log(sigma_e2) - p / 2 * np.log(sigma_b2) - 1 / (2 * sigma_e2) * (y - Z @ omega).T @ (y - Z @ omega) + 1 / sigma_e2 * (y - Z @ omega).T @ X @ m - 1 / (2 * sigma_e2) * (np.trace(X @ np.diag(s2) @ X.T) + m.T @ X.T @ X @ m) - 1 / (2 * sigma_b2) * (np.sum(s2) + m.T @ m)
+            # E_2 = -p / 2 * np.log(2 * np.pi) - 1 / 2 * np.sum(np.log(s2)) - p / 2
+            # ELBO = E_1 + E_2
+
+            # log_marginal_likelihoods.append(log_marginal_likelihood)
+            # ELBOs.append(ELBO)
+
+            # print(log_marginal_likelihood)
+            # print(ELBO)
 
         self.n = n
         self.p = p
@@ -122,16 +129,20 @@ class VariationalInference:
         self.log_marginal_likelihoods = np.array(log_marginal_likelihoods)
         self.ELBOs = np.array(ELBOs)
         self.Theta = Theta
-        self.m = m
+        self.E_beta = m
+        self.E_beta_2_diag = s2
 
         np.savetxt('outputs/log_marginal_likelihoods_vi.csv', log_marginal_likelihoods, delimiter=',')
         np.savetxt('outputs/ELBOs.csv', ELBOs, delimiter=',')
+
+        np.save('outputs/E_beta_vi.npy', self.E_beta)
+        np.save('outputs/E_beta_2_diag_vi.npy', self.E_beta_2_diag)
 
         return log_marginal_likelihoods, Theta
 
     def predict(self, Z, X):
         omega = self.Theta[:self.c]
-        E_beta = self.m
+        E_beta = self.E_beta
 
         y_hat = Z @ omega + X @ E_beta
 

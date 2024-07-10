@@ -93,4 +93,34 @@ def cv_boxplot(cv_mses_dirs, save_path='cv_boxplot.png', labels=['EM', 'LASSO', 
         cv_mses_ = np.genfromtxt(cv_mses_dirs[i])
         cv_mses.append(cv_mses_)
 
+        print(labels[i], ':', np.mean(cv_mses_))
+
     cv_boxplot_2(cv_mses, save_path, labels)
+
+def plot_E_beta_2(data_path, save_path='outputs/E_beta.png'):
+    E_beta_2 = np.load(data_path)
+    
+    plt.figure(figsize=(5, 3), dpi=300)
+    plt.imshow(E_beta_2, cmap='Blues', interpolation='nearest')
+    plt.colorbar()
+    plt.savefig(save_path, bbox_inches='tight')
+    plt.close()
+
+def plot_E_beta_2_diag(data_path, save_path='outputs/E_beta.png'):
+    E_beta_2 = np.load(data_path)
+
+    if E_beta_2.ndim == 2:
+        E_beta_2 = np.diagonal(E_beta_2)
+
+    plt.figure(figsize=(5, 3), dpi=300)
+    plt.plot(E_beta_2)
+    plt.savefig(save_path, bbox_inches='tight')
+    plt.close()
+
+def plot_E_beta(data_path, save_path='outputs/E_beta.png'):
+    E_beta = np.load(data_path)
+
+    plt.figure(figsize=(5, 3), dpi=300)
+    plt.plot(E_beta, color='red')
+    plt.savefig(save_path, bbox_inches='tight')
+    plt.close()

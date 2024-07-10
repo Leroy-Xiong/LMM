@@ -63,6 +63,7 @@ class EMAlgorithm:
 
         ZTZZT = np.linalg.inv(Z.T @ Z) @ Z.T
         XXT = X @ X.T
+        XTX = X.T @ X
         XXT_eigen_values, XXT_eigen_vectors = np.linalg.eig(XXT)
         
         for i in tqdm(range(self.max_iter), desc='EM Algorithm'): 
@@ -95,7 +96,10 @@ class EMAlgorithm:
             if np.linalg.norm(Theta_new - Theta) < self.tol:
                 break
 
-        
+            omega = omega_new
+            sigma_e2 = sigma_e2_new
+            sigma_b2 = sigma_b2_new
+            Theta = Theta_new
 
         self.n = n
         self.p = p
@@ -103,6 +107,11 @@ class EMAlgorithm:
         self.log_marginal_likelihoods = log_marginal_likelihoods
         self.Theta = np.hstack((omega, sigma_b2, sigma_e2))
         self.E_beta = mu
+        self.E_beta_2 = np.linalg.inv(XTX / sigma_e2 + np.eye(p) / sigma_b2)
+
+        np.save('outputs/E_beta_em.npy', self.E_beta)
+        np.save('outputs/E_beta_2_em.npy', self.E_beta_2)
+
         return log_marginal_likelihoods, self.Theta, self.E_beta
 
     def predict(self, Z, X):
