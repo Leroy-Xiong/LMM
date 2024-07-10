@@ -131,11 +131,14 @@ class VariationalInference:
         self.Theta = Theta
         self.E_beta = m
         self.E_beta_2_diag = s2
+        self.E_beta_2 = np.linalg.inv(XTX / sigma_e2 + np.eye(p) / sigma_b2)
+        self.E_beta = self.E_beta_2 @ X.T @ (y - Z @ omega)
 
         np.savetxt('outputs/log_marginal_likelihoods_vi.csv', log_marginal_likelihoods, delimiter=',')
         np.savetxt('outputs/ELBOs.csv', ELBOs, delimiter=',')
 
         np.save('outputs/E_beta_vi.npy', self.E_beta)
+        np.save('outputs/E_beta_2_vi.npy', self.E_beta_2)
         np.save('outputs/E_beta_2_diag_vi.npy', self.E_beta_2_diag)
 
         return log_marginal_likelihoods, Theta

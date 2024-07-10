@@ -1,3 +1,4 @@
+import time
 from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
@@ -121,6 +122,25 @@ def plot_E_beta(data_path, save_path='outputs/E_beta.png'):
     E_beta = np.load(data_path)
 
     plt.figure(figsize=(5, 3), dpi=300)
-    plt.plot(E_beta, color='red')
+    plt.plot(E_beta, color='red', lw=0.5, alpha=0.8)
+    plt.ylim((-1, 1))
     plt.savefig(save_path, bbox_inches='tight')
     plt.close()
+
+def plot_E_beta_difference(data_path_em, data_path_vi, save_path='outputs/E_beta_difference.png'):
+    E_beta_em = np.load(data_path_em)
+    E_beta_vi = np.load(data_path_vi)
+
+    plt.figure(figsize=(5, 3), dpi=300)
+    plt.plot(np.abs(E_beta_em - E_beta_vi), color='black', lw=0.5, alpha=0.8)
+    plt.ylim((-1, 1))
+    plt.savefig(save_path, bbox_inches='tight')
+    plt.close()
+
+def execution_time(func, *args, **kwargs):
+    start_time = time.time()
+    result = func(*args, **kwargs)
+    end_time = time.time()
+    execution_time = end_time - start_time
+    print(f"Time: {execution_time} s")
+    return result
